@@ -8,7 +8,14 @@ private:
     int currentIndex;
     int currentLine;
     int currentColumn;
+private:
+    std::string sourceCode;
+    int currentIndex;
+    int currentLine;
+    int currentColumn;
 
+    // Función auxiliar para verificar palabras reservadas
+    TokenType checkReservedWord(const std::string& lexeme);
 public:
     // Constructor: recibe todo el texto del archivo .task
     LexicalAnalyzer(const std::string& code);

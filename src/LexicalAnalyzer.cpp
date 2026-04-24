@@ -8,6 +8,24 @@ LexicalAnalyzer::LexicalAnalyzer(const std::string& code) {
     currentColumn = 1;
 }
 
+TokenType LexicalAnalyzer::checkReservedWord(const std::string& lexeme) {
+    if (lexeme == "TABLERO") return TokenType::RES_TABLERO;
+    if (lexeme == "COLUMNA") return TokenType::RES_COLUMNA;
+    if (lexeme == "tarea") return TokenType::RES_TAREA;
+    if (lexeme == "prioridad") return TokenType::RES_PRIORIDAD;
+    if (lexeme == "responsable") return TokenType::RES_RESPONSABLE;
+    if (lexeme == "fecha_limite") return TokenType::RES_FECHA_LIMITE;
+    if (lexeme == "ALTA") return TokenType::PRIO_ALTA;
+    if (lexeme == "MEDIA") return TokenType::PRIO_MEDIA;
+    if (lexeme == "BAJA") return TokenType::PRIO_BAJA;
+    
+    // Si no es ninguna de las anteriores, teóricamente en este lenguaje 
+    // no hay identificadores libres (como nombres de variables), así que 
+    // si no es reservada, en este contexto estricto, podría considerarse un error léxico.
+    // Pero por ahora, retornemos un token de error.
+    return TokenType::ERROR_LEXICO; 
+}  
+
 Token LexicalAnalyzer::nextToken() {
     int state = 0;            // Siempre iniciamos en S0
     std::string lexeme = "";  // Aquí iremos concatenando los caracteres
@@ -60,23 +78,39 @@ Token LexicalAnalyzer::nextToken() {
                 // ... (Falta la transición S2 para números/fechas y el manejo de errores)
                 break;
 
-            case 1: // S1: Capturando letras (LL*)
-                if (isalpha(c) || c == '_') { // Agregamos '_' por 'fecha_limite'
+          case 1: // S1: Capturando letras para palabras reservadas
+                // El estado S1 acepta letras y guion bajo (para 'fecha_limite')
+                if (isalpha(c) || c == '_') { 
                     lexeme += c;
+                    currentIndex++;
+                    currentColumn++;
                 } else {
-                    // ¡Encontramos un carácter que no es letra! 
-                    // El token terminó. NO avanzamos el currentIndex para que 
-                    // el próximo nextToken() analice este carácter.
-                    
-                    // Aquí verificaríamos si 'lexeme' es una palabra reservada o un error
-                    // return Token(TokenType::RES_TABLERO, lexeme, startLine, startCol);
+                    // ¡Encontramos algo que no es letra! Terminó la palabra.
+                    // IMPORTANTE: NO avanzamos el currentIndex. Así el próximo 
+                    // nextToken() evalúa este nuevo carácter desde S0.
+                    TokenType type = checkReservedWord(lexeme);
+                    return Token(type, lexeme, startLine, startCol);
                 }
                 break;
 
-            case 3: // S3: Capturando cadena de texto
-                // ... la lógica para buscar la comilla de cierre ...
+          case 3: // S3: Capturando cadena de texto (inició con ")
+                if (c == '"') {
+                    // ¡Encontramos el cierre!
+                    lexeme += c;
+                    currentIndex++;
+                    currentColumn++;
+                    return Token(TokenType::CADENA, lexeme, startLine, startCol);
+                } else if (c == '\n' || currentIndex >= sourceCode.length()) {
+                    // REQUISITO CUMPLIDO: Error crítico por cadena sin cerrar antes de fin de línea.
+                    // Cortamos el análisis de la cadena aquí y reportamos el error.
+                    return Token(TokenType::ERROR_LEXICO, lexeme, startLine, startCol);
+                } else {
+                    // Cualquier otro carácter es parte de la cadena
+                    lexeme += c;
+                    currentIndex++;
+                    currentColumn++;
+                }
                 break;
-                
             // ... los demás estados ...
         }
 
@@ -88,3 +122,4 @@ Token LexicalAnalyzer::nextToken() {
     // Si salimos del while, llegamos al final del archivo
     return Token(TokenType::FIN_ARCHIVO, "EOF", currentLine, currentColumn);
 }
+
