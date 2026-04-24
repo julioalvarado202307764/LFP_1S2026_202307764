@@ -57,14 +57,31 @@ public:
 
     // Método utilitario: Te será MUY útil para imprimir la tabla de tokens
     // en los reportes HTML, convirtiendo el enum a un string legible.
-    std::string getTypeName() const {
+std::string getTypeName() const {
         switch (type) {
             case TokenType::RES_TABLERO: return "Reservada TABLERO";
-            case TokenType::ENTERO: return "Número Entero";
+            case TokenType::RES_COLUMNA: return "Reservada COLUMNA";
+            case TokenType::RES_TAREA: return "Reservada TAREA";
+            case TokenType::RES_PRIORIDAD: return "Reservada PRIORIDAD";
+            case TokenType::RES_RESPONSABLE: return "Reservada RESPONSABLE";
+            case TokenType::RES_FECHA_LIMITE: return "Reservada FECHA_LIMITE";
+            case TokenType::PRIO_ALTA: return "Prioridad ALTA";
+            case TokenType::PRIO_MEDIA: return "Prioridad MEDIA";
+            case TokenType::PRIO_BAJA: return "Prioridad BAJA";
+            case TokenType::FECHA: return "Fecha";
+            case TokenType::ENTERO: return "Numero Entero";
             case TokenType::CADENA: return "Cadena de Texto";
-            case TokenType::ERROR_LEXICO: return "Error Léxico";
+            case TokenType::LLAVE_A: return "Llave Abre {";
+            case TokenType::LLAVE_C: return "Llave Cierra }";
+            case TokenType::PAR_A: return "Parentesis Abre (";
+            case TokenType::PAR_C: return "Parentesis Cierra )";
+            case TokenType::COR_A: return "Corchete Abre [";
+            case TokenType::COR_C: return "Corchete Cierra ]";
+            case TokenType::DOS_PUNTOS: return "Dos Puntos :";
+            case TokenType::COMA: return "Coma ,";
+            case TokenType::PUNTO_Y_COMA: return "Punto y Coma ;";
+            case TokenType::ERROR_LEXICO: return "Error Lexico";
             case TokenType::FIN_ARCHIVO: return "Fin de Archivo";
-            // ... (completarías el resto de casos) ...
             default: return "Desconocido";
         }
     }
