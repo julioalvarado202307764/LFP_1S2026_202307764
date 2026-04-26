@@ -4,6 +4,7 @@
 #include "LexicalAnalyzer.h"
 #include "SyntaxAnalyzer.h"
 #include "ErrorManager.h"
+#include "ReportGenerator.h"
 
 int main() {
     // 1. Leer el archivo de prueba
@@ -40,8 +41,17 @@ int main() {
         // ¡Generamos el DOT!
         reportGen.generateGraphviz("arbol.dot");
         std::cout << " Archivo 'arbol.dot' generado exitosamente.\n";
+        // ¡Generamos el HTML!
+        // Le pedimos el tablero al parser y los errores al manager
+        reportGen.generateHTMLReports(parser.getTableroData(), errorManager.getErrors());
+        std::cout << " Reporte HTML (Tablero) generado exitosamente.\n";
     } else {
         std::cout << " SE ENCONTRARON ERRORES DURANTE EL ANALISIS \n";
+        std::cout << " Revisa el archivo 'Reporte3_Errores.html' para mas detalles.\n";
+        ReportGenerator generadorErrores; 
+        generadorErrores.generateErroresHTML(errorManager.getErrors());
+
+
         std::cout << "--------------------------------------------------------\n";
         std::cout << "No.\tTipo\t\tLinea\tCol\tLexema/Descripcion\n";
         std::cout << "--------------------------------------------------------\n";

@@ -6,9 +6,35 @@
 SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer &lex, ErrorManager &err, ReportGenerator &rep)
     : lexer(lex), errorManager(err), reportGen(rep)
 {
+    avanzarToken();
+}
+// --- Filtro Antibasura (Ignora errores léxicos y los registra) ---
+// --- Filtro Antibasura (Ignora errores léxicos y los registra) ---
+void SyntaxAnalyzer::avanzarToken()
+{
+    // Pedimos un token
     currentToken = lexer.nextToken();
+
+    // Si es un error léxico, lo registramos y pedimos otro hasta encontrar uno válido (o el fin)
+    while (currentToken.getType() == TokenType::ERROR_LEXICO)
+    {
+        errorManager.addError(ErrorType::LEXICO, currentToken.getLexeme(),
+                              "Simbolo o palabra no reconocida.",
+                              currentToken.getLine(), currentToken.getColumn());
+
+        currentToken = lexer.nextToken();
+    }
 }
 
+void SyntaxAnalyzer::syncToCommaOrBracket()
+{
+    while (currentToken.getType() != TokenType::COMA &&
+           currentToken.getType() != TokenType::COR_C &&
+           currentToken.getType() != TokenType::FIN_ARCHIVO)
+    {
+        avanzarToken();
+    }
+}
 // --- Método de Arranque ---
 void SyntaxAnalyzer::parse()
 {
@@ -39,7 +65,7 @@ int SyntaxAnalyzer::match(TokenType expectedType, int parentId)
         reportGen.addChild(parentId, leafId);
 
         // 3. Avanzamos
-        currentToken = lexer.nextToken();
+        avanzarToken();
         return leafId;
     }
     else
@@ -59,12 +85,12 @@ void SyntaxAnalyzer::panicModeSync(TokenType syncToken)
     while (currentToken.getType() != syncToken &&
            currentToken.getType() != TokenType::FIN_ARCHIVO)
     {
-        currentToken = lexer.nextToken();
+        avanzarToken();
     }
     // Si salimos del while porque encontramos el token de sincronización, lo consumimos
     if (currentToken.getType() == syncToken)
     {
-        currentToken = lexer.nextToken();
+        avanzarToken();
     }
 }
 
@@ -75,19 +101,29 @@ void SyntaxAnalyzer::panicModeSync(TokenType syncToken)
 // <programa> ::= TABLERO CADENA "{" <columnas> "}"
 void SyntaxAnalyzer::programa(int parentId)
 {
-    // Los terminales se conectan directamente al parentId (<programa>)
     match(TokenType::RES_TABLERO, parentId);
+
+    // ¡AQUÍ ATRAPAMOS EL DATO!
+    // Guardamos el lexema de la cadena antes de que match() avance al siguiente token
+    if (currentToken.getType() == TokenType::CADENA)
+    {
+        tableroActual.titulo = currentToken.getLexeme();
+    }
     match(TokenType::CADENA, parentId);
+
     match(TokenType::LLAVE_A, parentId);
 
-    // Para las reglas compuestas, creamos un sub-nodo azul y lo conectamos
     int columnasNodeId = reportGen.addNode("<columnas>");
     reportGen.addChild(parentId, columnasNodeId);
 
-    // Llamamos a la función pasándole SU nuevo nodo padre
-    columnas(columnasNodeId);
+    // Le pasamos la lista de columnas de nuestro tableroActual
+    columnas(columnasNodeId, tableroActual.columnas);
 
     match(TokenType::LLAVE_C, parentId);
+    if (currentToken.getType() == TokenType::PUNTO_Y_COMA)
+    {
+        match(TokenType::PUNTO_Y_COMA, parentId);
+    }
 }
 
 // ===============================================
@@ -95,48 +131,59 @@ void SyntaxAnalyzer::programa(int parentId)
 // ===============================================
 
 // <columnas> ::= <columna> <columnas_prima>
-void SyntaxAnalyzer::columnas(int parentId)
+void SyntaxAnalyzer::columnas(int parentId, std::vector<ColumnaData> &columnasList)
 {
     int columnaNodeId = reportGen.addNode("<columna>");
     reportGen.addChild(parentId, columnaNodeId);
-    columna(columnaNodeId);
+    columna(columnaNodeId, columnasList); // Pasamos la lista hacia abajo
 
     int colPrimaNodeId = reportGen.addNode("<columnas_prima>");
     reportGen.addChild(parentId, colPrimaNodeId);
-    columnas_prima(colPrimaNodeId);
+    columnas_prima(colPrimaNodeId, columnasList);
 }
 
 // <columnas_prima> ::= <columna> <columnas_prima> | ε
-void SyntaxAnalyzer::columnas_prima(int parentId)
+void SyntaxAnalyzer::columnas_prima(int parentId, std::vector<ColumnaData> &columnasList)
 {
-    // El conjunto FIRST de <columna> es la palabra reservada COLUMNA
     if (currentToken.getType() == TokenType::RES_COLUMNA)
     {
         int columnaNodeId = reportGen.addNode("<columna>");
         reportGen.addChild(parentId, columnaNodeId);
-        columna(columnaNodeId);
+        columna(columnaNodeId, columnasList);
 
         int colPrimaNodeId = reportGen.addNode("<columnas_prima>");
         reportGen.addChild(parentId, colPrimaNodeId);
-        columnas_prima(colPrimaNodeId);
+        columnas_prima(colPrimaNodeId, columnasList);
     }
-    // Si no es COLUMNA, aplicamos transición ε (épsilon).
-    // Simplemente no hacemos nada y la recursividad termina solita.
 }
 
 // <columna> ::= COLUMNA CADENA "(" <tareas_opt> ")" ";"
-void SyntaxAnalyzer::columna(int parentId)
+void SyntaxAnalyzer::columna(int parentId, std::vector<ColumnaData> &columnasList)
 {
+    // 1. Preparamos una nueva caja para esta columna
+    ColumnaData nuevaColumna;
+
     match(TokenType::RES_COLUMNA, parentId);
+
+    // 2. Atrapamos el nombre de la columna
+    if (currentToken.getType() == TokenType::CADENA)
+    {
+        nuevaColumna.nombre = currentToken.getLexeme();
+    }
     match(TokenType::CADENA, parentId);
-    match(TokenType::PAR_A, parentId); // '('
 
-    int tareas = reportGen.addNode("<tareas_opt>");
-    reportGen.addChild(parentId, tareas);
-    tareas_opt(tareas);
+    match(TokenType::LLAVE_A, parentId);
 
-    match(TokenType::PAR_C, parentId);        // ')'
-    match(TokenType::PUNTO_Y_COMA, parentId); // ';'
+    // 3. Procesamos las tareas, pasándole la lista de la nueva columna
+    int tareasOptNodeId = reportGen.addNode("<tareas_opt>");
+    reportGen.addChild(parentId, tareasOptNodeId);
+    tareas_opt(tareasOptNodeId, nuevaColumna.tareas);
+
+    match(TokenType::LLAVE_C, parentId);
+    match(TokenType::PUNTO_Y_COMA, parentId);
+
+    // 4. Guardamos la columna terminada en la lista del tablero
+    columnasList.push_back(nuevaColumna);
 }
 
 // ===============================================
@@ -144,160 +191,233 @@ void SyntaxAnalyzer::columna(int parentId)
 // ===============================================
 
 // <tareas_opt> ::= <lista_tareas> | ε
-void SyntaxAnalyzer::tareas_opt(int parentId)
+void SyntaxAnalyzer::tareas_opt(int parentId, std::vector<TareaData> &tareasList)
 {
     // El FIRST de <lista_tareas> es la palabra reservada 'tarea'
     if (currentToken.getType() == TokenType::RES_TAREA)
     {
-        int list_tareas = reportGen.addNode("<lista_tareas>");
-        reportGen.addChild(parentId, list_tareas);
-        lista_tareas(list_tareas);
+        // 1. Creamos el nodo para la lista
+        int list_tareas_id = reportGen.addNode("<lista_tareas>");
+        reportGen.addChild(parentId, list_tareas_id);
+
+        // 2. LLAMADA CLAVE: Pasamos el ID del nodo y la lista de datos
+        lista_tareas(list_tareas_id, tareasList);
     }
-    // Si es otra cosa (como un ')'), aplica ε y significa que la columna está vacía
+    else
+    {
+        // 3. CAMINO EPSILON (ε): Si la columna está vacía, dibujamos el símbolo épsilon
+        // El 'true' es para que se pinte de color celeste (terminal)
+        int epsilonId = reportGen.addNode("ε", true);
+        reportGen.addChild(parentId, epsilonId);
+    }
 }
 
 // <lista_tareas> ::= <tarea> <tareas_prima>
-void SyntaxAnalyzer::lista_tareas(int parentId)
+void SyntaxAnalyzer::lista_tareas(int parentId, std::vector<TareaData> &tareasList)
 {
     int tar = reportGen.addNode("<tarea>");
     reportGen.addChild(parentId, tar);
-    tarea(tar);
+    tarea(tar, tareasList); // <- ¡Aquí pasamos la lista!
 
     int tar_prima = reportGen.addNode("<tareas_prima>");
     reportGen.addChild(parentId, tar_prima);
-    tareas_prima(tar_prima);
+    tareas_prima(tar_prima, tareasList); // <- ¡Y aquí también!
 }
 
 // <tareas_prima> ::= "," <tarea> <tareas_prima> | ε
-void SyntaxAnalyzer::tareas_prima(int parentId)
+void SyntaxAnalyzer::tareas_prima(int parentId, std::vector<TareaData> &tareasList)
 {
     if (currentToken.getType() == TokenType::COMA)
     {
+        // Graficamos y consumimos la coma
         match(TokenType::COMA, parentId);
-        int tar = reportGen.addNode("<tarea>");
-        reportGen.addChild(parentId, tar);
-        tarea(tar);
 
-        int tar_prima = reportGen.addNode("<tareas_prima>");
-        reportGen.addChild(parentId, tar_prima);
-        tareas_prima(tar_prima);
+        if (currentToken.getType() == TokenType::RES_TAREA)
+        {
+            int tar = reportGen.addNode("<tarea>");
+            reportGen.addChild(parentId, tar);
+            tarea(tar, tareasList);
+
+            int tar_prima = reportGen.addNode("<tareas_prima>");
+            reportGen.addChild(parentId, tar_prima);
+            tareas_prima(tar_prima, tareasList);
+        }
+        else
+        {
+            // Era una coma final (trailing comma). Aplicamos el camino épsilon (ε)
+            int epsilonId = reportGen.addNode("ε", true);
+            reportGen.addChild(parentId, epsilonId);
+        }
     }
-    // ε si no hay coma
+    else
+    {
+        // CAMINO EPSILON normal
+        int epsilonId = reportGen.addNode("ε", true);
+        reportGen.addChild(parentId, epsilonId);
+    }
 }
 
 // <tarea> ::= tarea ":" CADENA "[" <atributos> "]"
-void SyntaxAnalyzer::tarea(int parentId)
+void SyntaxAnalyzer::tarea(int parentId, std::vector<TareaData> &tareasList)
 {
+    // 1. Preparamos una nueva caja para esta tarea
+    TareaData nuevaTarea;
+
     match(TokenType::RES_TAREA, parentId);
     match(TokenType::DOS_PUNTOS, parentId);
+
+    // 2. Atrapamos el nombre de la tarea
+    if (currentToken.getType() == TokenType::CADENA)
+    {
+        nuevaTarea.nombre = currentToken.getLexeme();
+    }
     match(TokenType::CADENA, parentId);
-    match(TokenType::COR_A, parentId); // '['
+    match(TokenType::COR_A, parentId);
 
-    int atrib = reportGen.addNode("<atributos>");
-    reportGen.addChild(parentId, atrib);
-    atributos(atrib);
+    int atributosNodeId = reportGen.addNode("<atributos>");
+    reportGen.addChild(parentId, atributosNodeId);
 
-    // Aquí implementamos el "Modo Pánico" de forma sencilla.
-    // Si hubo un error en los atributos, sincronizamos hasta el corchete de cierre
-    // para no arruinar el análisis de la siguiente tarea.
+    // 3. Llamamos a atributos() pasándole la nuevaTarea para que la llene
+    atributos(atributosNodeId, nuevaTarea);
+
     if (currentToken.getType() != TokenType::COR_C && currentToken.getType() != TokenType::FIN_ARCHIVO)
     {
+
+        // Registrar que la sintaxis falló adentro de los corchetes
+        errorManager.addError(ErrorType::SINTACTICO, currentToken.getLexeme(),
+                              "Falta una coma ',' o se esperaba cerrar con ']'.",
+                              currentToken.getLine(), currentToken.getColumn());
+
         panicModeSync(TokenType::COR_C);
     }
     else
     {
-        match(TokenType::COR_C, parentId); // ']'
+        match(TokenType::COR_C, parentId);
     }
-}
 
+    // 4. Guardamos la tarea en la lista de la columna
+    tareasList.push_back(nuevaTarea);
+}
 // ===============================================
 // BLOQUE DE ATRIBUTOS
 // ===============================================
 
 // <atributos> ::= <atributo> <atributos_prima>
-void SyntaxAnalyzer::atributos(int parentId)
+// <atributos> ::= <atributo> <atributos_prima>
+void SyntaxAnalyzer::atributos(int parentId, TareaData &tareaActual)
 {
-    int atrib = reportGen.addNode("<atributo>");
-    reportGen.addChild(parentId, atrib);
-    atributo(atrib);
+    // 1. Llamamos al primer atributo
+    int atributoNodeId = reportGen.addNode("<atributo>");
+    reportGen.addChild(parentId, atributoNodeId);
+    atributo(atributoNodeId, tareaActual);
 
-    int atributos_prm = reportGen.addNode("<atributos_prima");
-    reportGen.addChild(parentId, atributos_prm);
-    atributos_prima(atributos_prm);
+    // 2. Llamamos a la recursividad por si hay más atributos separados por coma
+    int atrPrimaNodeId = reportGen.addNode("<atributos_prima>");
+    reportGen.addChild(parentId, atrPrimaNodeId);
+    atributos_prima(atrPrimaNodeId, tareaActual);
 }
 
 // <atributos_prima> ::= "," <atributo> <atributos_prima> | ε
-void SyntaxAnalyzer::atributos_prima(int parentId)
+void SyntaxAnalyzer::atributos_prima(int parentId, TareaData &tareaActual)
 {
+    // El FIRST de esta regla es la coma (,)
     if (currentToken.getType() == TokenType::COMA)
     {
+        // 1. Graficamos y consumimos la coma
         match(TokenType::COMA, parentId);
-        int atrib = reportGen.addNode("<atributo>");
-        reportGen.addChild(parentId, atrib);
-        atributo(atrib);
 
-        int atributos_prm = reportGen.addNode("<atributos_prima");
-        reportGen.addChild(parentId, atributos_prm);
-        atributos_prima(atributos_prm);
+        // 2. Graficamos y llamamos al siguiente atributo
+        int atributoNodeId = reportGen.addNode("<atributo>");
+        reportGen.addChild(parentId, atributoNodeId);
+        atributo(atributoNodeId, tareaActual);
+
+        // 3. Llamada recursiva para ver si hay MÁS atributos después
+        int atrPrimaNodeId = reportGen.addNode("<atributos_prima>");
+        reportGen.addChild(parentId, atrPrimaNodeId);
+        atributos_prima(atrPrimaNodeId, tareaActual);
     }
-    // ε si no hay coma
+    else
+    {
+        // CAMINO EPSILON (ε): Ya no hay coma, se acabaron los atributos de esta tarea.
+        int epsilonId = reportGen.addNode("ε", true);
+        reportGen.addChild(parentId, epsilonId);
+    }
 }
 
 // <atributo> ::= prioridad ":" <prioridad> | responsable ":" CADENA | fecha_limite ":" FECHA
-void SyntaxAnalyzer::atributo(int parentId)
+void SyntaxAnalyzer::atributo(int parentId, TareaData &tareaActual)
 {
     if (currentToken.getType() == TokenType::RES_PRIORIDAD)
     {
         match(TokenType::RES_PRIORIDAD, parentId);
         match(TokenType::DOS_PUNTOS, parentId);
 
-        int priori = reportGen.addNode("<prioridad>");
-        reportGen.addChild(parentId, priori);
-        prioridad(priori);
+        int prioridadNodeId = reportGen.addNode("<prioridad>");
+        reportGen.addChild(parentId, prioridadNodeId);
+        prioridad(prioridadNodeId, tareaActual);
     }
     else if (currentToken.getType() == TokenType::RES_RESPONSABLE)
     {
         match(TokenType::RES_RESPONSABLE, parentId);
         match(TokenType::DOS_PUNTOS, parentId);
+
+        // Atrapamos el responsable
+        if (currentToken.getType() == TokenType::CADENA)
+        {
+            tareaActual.responsable = currentToken.getLexeme();
+        }
+        match(TokenType::CADENA, parentId);
     }
     else if (currentToken.getType() == TokenType::RES_FECHA_LIMITE)
     {
         match(TokenType::RES_FECHA_LIMITE, parentId);
         match(TokenType::DOS_PUNTOS, parentId);
+
+        // Atrapamos la fecha
+        if (currentToken.getType() == TokenType::FECHA)
+        {
+            tareaActual.fecha_limite = currentToken.getLexeme();
+        }
         match(TokenType::FECHA, parentId);
     }
     else
     {
-        // Si no es ninguno de los 3 atributos válidos, registramos error sintáctico
-        std::string desc = "Se esperaba un atributo (prioridad, responsable o fecha_limite).";
+        // Si no es un atributo válido, lo registramos.
         errorManager.addError(ErrorType::SINTACTICO, currentToken.getLexeme(),
-                              desc, currentToken.getLine(), currentToken.getColumn());
-
-        // Consumimos el token malo para no quedarnos en un bucle infinito
-        currentToken = lexer.nextToken();
+                              "Se esperaba un atributo (prioridad, responsable o fecha_limite).",
+                              currentToken.getLine(), currentToken.getColumn());
+    }
+    // Si terminamos en un token que NO es coma ni corchete, significa que hubo basura adentro del atributo.
+    // Sincronizamos para que la siguiente función pueda leer en paz.
+    if (currentToken.getType() != TokenType::COMA && currentToken.getType() != TokenType::COR_C)
+    {
+        syncToCommaOrBracket();
     }
 }
 
 // <prioridad> ::= ALTA | MEDIA | BAJA
-void SyntaxAnalyzer::prioridad(int parentId)
+void SyntaxAnalyzer::prioridad(int parentId, TareaData &tareaActual)
 {
     if (currentToken.getType() == TokenType::PRIO_ALTA)
     {
+        tareaActual.prioridad = "ALTA";
         match(TokenType::PRIO_ALTA, parentId);
     }
     else if (currentToken.getType() == TokenType::PRIO_MEDIA)
     {
+        tareaActual.prioridad = "MEDIA";
         match(TokenType::PRIO_MEDIA, parentId);
     }
     else if (currentToken.getType() == TokenType::PRIO_BAJA)
     {
+        tareaActual.prioridad = "BAJA";
         match(TokenType::PRIO_BAJA, parentId);
     }
     else
     {
-        std::string desc = "Se esperaba nivel de prioridad (ALTA, MEDIA, BAJA).";
         errorManager.addError(ErrorType::SINTACTICO, currentToken.getLexeme(),
-                              desc, currentToken.getLine(), currentToken.getColumn());
-        currentToken = lexer.nextToken();
+                              "Se esperaba nivel de prioridad (ALTA, MEDIA, BAJA).",
+                              currentToken.getLine(), currentToken.getColumn());
+        // ¡NADA MÁS AQUÍ!
     }
 }

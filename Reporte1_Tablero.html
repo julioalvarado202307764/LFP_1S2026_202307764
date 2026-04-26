@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tablero Kanban</title>
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f5f7; margin: 0; padding: 20px; }
+  h1 { color: #172b4d; text-align: center; }
+  .board { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; align-items: flex-start; }
+  .column { background-color: #ebecf0; border-radius: 8px; width: 300px; min-width: 300px; padding: 10px; box-sizing: border-box; }
+  .column-header { font-weight: bold; color: #172b4d; margin-bottom: 15px; padding-left: 5px; }
+  .task-card { background-color: white; border-radius: 6px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); border-left: 4px solid transparent; }
+  .task-title { font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+  .task-detail { font-size: 12px; color: #5e6c84; margin-bottom: 4px; }
+  /* Colores de Prioridad */
+  .prio-ALTA { border-left-color: #ff5630; }
+  .prio-MEDIA { border-left-color: #ffab00; }
+  .prio-BAJA { border-left-color: #36b37e; }
+  .badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 11px; margin-bottom: 8px; }
+  .badge-ALTA { background-color: #ffebe6; color: #bf2600; }
+  .badge-MEDIA { background-color: #fffae6; color: #ff8b00; }
+  .badge-BAJA { background-color: #e3fcef; color: #006644; }
+</style>
+</head>
+<body>
+<h1>"Proyecto LFP"</h1>
+<div class="board">
+  <div class="column">
+    <div class="column-header">"Por Hacer" (3)</div>
+    <div class="task-card prio-">
+      <div class="task-title">"Diseñar AFD"</div>
+      <span class="badge badge-"></span>
+      <div class="task-detail"><strong>Resp:</strong> "Jorge"</div>
+      <div class="task-detail"><strong>Límite:</strong> 2026-05-01</div>
+    </div>
+    <div class="task-card prio-ALTA">
+      <div class="task-title">"Implementar Lexer"</div>
+      <span class="badge badge-ALTA">ALTA</span>
+      <div class="task-detail"><strong>Resp:</strong> "María"</div>
+      <div class="task-detail"><strong>Límite:</strong> 2026-05-08</div>
+    </div>
+    <div class="task-card prio-MEDIA">
+      <div class="task-title">"Escribir casos de prueba"</div>
+      <span class="badge badge-MEDIA">MEDIA</span>
+      <div class="task-detail"><strong>Resp:</strong> "Carlos"</div>
+      <div class="task-detail"><strong>Límite:</strong> 2026-05-10</div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="column-header">"En Progreso" (1)</div>
+    <div class="task-card prio-MEDIA">
+      <div class="task-title">"Diseñar GUI"</div>
+      <span class="badge badge-MEDIA">MEDIA</span>
+      <div class="task-detail"><strong>Resp:</strong> "Ana"</div>
+      <div class="task-detail"><strong>Límite:</strong> 2026-05-05</div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="column-header">"Completado" (2)</div>
+    <div class="task-card prio-BAJA">
+      <div class="task-title">"Investigar Qt"</div>
+      <span class="badge badge-BAJA">BAJA</span>
+      <div class="task-detail"><strong>Resp:</strong> "Pedro"</div>
+      <div class="task-detail"><strong>Límite:</strong> 2026-04-20</div>
+    </div>
+    <div class="task-card prio-BAJA">
+      <div class="task-title">"Configurar GitHub"</div>
+      <span class="badge badge-BAJA">BAJA</span>
+      <div class="task-detail"><strong>Resp:</strong> "Jorge"</div>
+      <div class="task-detail"><strong>Límite:</strong> 2026-04-18</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

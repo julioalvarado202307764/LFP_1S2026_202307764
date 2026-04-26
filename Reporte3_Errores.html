@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reporte de Errores</title>
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f5f7; margin: 0; padding: 20px; }
+  h1 { color: #de350b; text-align: center; } /* Título rojo oscuro */
+  .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-top: 5px solid #de350b; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #dfe1e6; }
+  th { background-color: #ffebe6; color: #bf2600; font-weight: 600; text-transform: uppercase; font-size: 12px; } /* Cabecera rojita */
+  .tipo-lexico { font-weight: bold; color: #ff8b00; } /* Naranja para Léxico */
+  .tipo-sintactico { font-weight: bold; color: #bf2600; } /* Rojo para Sintáctico */
+  .lexema { font-family: 'Courier New', Courier, monospace; background-color: #f4f5f7; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Tabla de Errores</h1>
+<table>
+  <tr><th>No.</th><th>Tipo</th><th>Línea</th><th>Columna</th><th>Lexema</th><th>Descripción</th></tr>
+  <tr>
+    <td>1</td>
+    <td class="tipo-lexico">Léxico</td>
+    <td>3</td>
+    <td>9</td>
+    <td><span class="lexema">$</span></td>
+    <td>Simbolo o palabra no reconocida.</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td class="tipo-lexico">Léxico</td>
+    <td>4</td>
+    <td>43</td>
+    <td><span class="lexema">CRITICA</span></td>
+    <td>Simbolo o palabra no reconocida.</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td class="tipo-sintactico">Sintáctico</td>
+    <td>4</td>
+    <td>50</td>
+    <td><span class="lexema">,</span></td>
+    <td>Se esperaba nivel de prioridad (ALTA, MEDIA, BAJA).</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td class="tipo-lexico">Léxico</td>
+    <td>5</td>
+    <td>54</td>
+    <td><span class="lexema">encargado</span></td>
+    <td>Simbolo o palabra no reconocida.</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td class="tipo-sintactico">Sintáctico</td>
+    <td>5</td>
+    <td>63</td>
+    <td><span class="lexema">:</span></td>
+    <td>Se esperaba un atributo (prioridad, responsable o fecha_limite).</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td class="tipo-sintactico">Sintáctico</td>
+    <td>14</td>
+    <td>86</td>
+    <td><span class="lexema">2026</span></td>
+    <td>Error de sintaxis. Token inesperado.</td>
+  </tr>
+  <tr>
+    <td>7</td>
+    <td class="tipo-lexico">Léxico</td>
+    <td>14</td>
+    <td>90</td>
+    <td><span class="lexema">/</span></td>
+    <td>Simbolo o palabra no reconocida.</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td class="tipo-lexico">Léxico</td>
+    <td>14</td>
+    <td>93</td>
+    <td><span class="lexema">/</span></td>
+    <td>Simbolo o palabra no reconocida.</td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td class="tipo-sintactico">Sintáctico</td>
+    <td>17</td>
+    <td>1</td>
+    <td><span class="lexema">}</span></td>
+    <td>Error de sintaxis. Token inesperado.</td>
+  </tr>
+</table>
+</div>
+</body>
+</html>
