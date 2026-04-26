@@ -20,12 +20,13 @@ int main() {
     std::string sourceCode = buffer.str();
     file.close();
 
-    // 2. Instanciar los componentes en orden
+ // 2. Instanciar los componentes en orden
     ErrorManager errorManager;
     LexicalAnalyzer lexer(sourceCode);
+    ReportGenerator reportGen; // ¡Instanciamos el generador!
     
-    // Le pasamos el lexer y el errorManager al parser
-    SyntaxAnalyzer parser(lexer, errorManager);
+  // Le pasamos todo al parser
+    SyntaxAnalyzer parser(lexer, errorManager, reportGen);
 
     std::cout << "Iniciando analisis sintactico...\n";
     std::cout << "========================================================\n";
@@ -36,7 +37,9 @@ int main() {
     // 4. Revisar los resultados
     if (!errorManager.hasErrors()) {
         std::cout << " FELICIDADES! El archivo es sintacticamente CORRECTO. \n";
-        std::cout << " La Fase 2 esta completa. Listo para generar Graphviz.\n";
+        // ¡Generamos el DOT!
+        reportGen.generateGraphviz("arbol.dot");
+        std::cout << " Archivo 'arbol.dot' generado exitosamente.\n";
     } else {
         std::cout << " SE ENCONTRARON ERRORES DURANTE EL ANALISIS \n";
         std::cout << "--------------------------------------------------------\n";

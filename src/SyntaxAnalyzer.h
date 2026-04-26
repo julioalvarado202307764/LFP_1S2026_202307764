@@ -1,40 +1,37 @@
 #pragma once
 #include "LexicalAnalyzer.h"
 #include "ErrorManager.h"
+#include "ReportGenerator.h" // ¡No olvides incluir esto!
 
 class SyntaxAnalyzer {
 private:
     LexicalAnalyzer& lexer;
     ErrorManager& errorManager;
+    ReportGenerator& reportGen; // Nueva referencia
     Token currentToken;
 
-    // --- Método central de validación ---
-    // Verifica si el token actual es el esperado. Si lo es, avanza al siguiente.
-    // Si no, reporta un error sintáctico.
-    void match(TokenType expectedType);
+    // Modificamos match para que reciba el ID del nodo padre y retorne el ID del nodo creado
+    int match(TokenType expectedType, int parentId);
 
-    // --- Métodos del Parser Descendente Recursivo ---
-    // Cada producción de tu gramática LL(1) se convierte en una función
-    void programa();
-    void columnas();
-    void columnas_prima();
-    void columna();
-    void tareas_opt();
-    void lista_tareas();
-    void tareas_prima();
-    void tarea();
-    void atributos();
-    void atributos_prima();
-    void atributo();
-    void prioridad();
+    // Modificamos las reglas para que reciban el ID de su nodo padre
+    void programa(int parentId);
+    void columnas(int parentId);
+    void columnas_prima(int parentId);
+    void columna(int parentId);
+    void tareas_opt(int parentId);
+    void lista_tareas(int parentId);
+    void tareas_prima(int parentId);
+    void tarea(int parentId);
+    void atributos(int parentId);
+    void atributos_prima(int parentId);
+    void atributo(int parentId);
+    void prioridad(int parentId);
 
-    // Método auxiliar para el modo pánico (recuperación de errores)
     void panicModeSync(TokenType syncToken);
 
 public:
-    // El constructor recibe referencias al lexer y al gestor de errores
-    SyntaxAnalyzer(LexicalAnalyzer& lex, ErrorManager& err);
+    // Actualizamos el constructor
+    SyntaxAnalyzer(LexicalAnalyzer& lex, ErrorManager& err, ReportGenerator& rep);
 
-    // Inicia el proceso de análisis
     void parse();
 };

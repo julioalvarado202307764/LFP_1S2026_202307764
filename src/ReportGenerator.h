@@ -47,13 +47,23 @@ public:
         file << "    node [shape=box, style=filled, fontname=\"Arial\"];\n\n";
 
         // 1. Declarar todos los nodos con sus colores
+      // 1. Declarar todos los nodos con sus colores
         for (const auto& node : treeNodes) {
             std::string fillColor = node.isTerminal ? "\"#D6EAF8\"" : "\"#2E75B6\"";
             std::string fontColor = node.isTerminal ? "black" : "white";
             
-            // Escapamos las comillas dobles para Graphviz
-            std::string safeLabel = node.label;
-            if (safeLabel == "\"") safeLabel = "\\\""; 
+            // --- EL PARCHE ANTI-EXPLOSIONES ---
+            std::string safeLabel = "";
+            for (char c : node.label) {
+                if (c == '"') {
+                    safeLabel += "\\\""; // Escapamos la comilla
+                } else if (c == '\\') {
+                    safeLabel += "\\\\"; // Escapamos la barra invertida por seguridad
+                } else {
+                    safeLabel += c;
+                }
+            }
+            // ----------------------------------
             
             file << "    n" << node.id << " [label=\"" << safeLabel 
                  << "\", fillcolor=" << fillColor << ", fontcolor=" << fontColor << "];\n";
