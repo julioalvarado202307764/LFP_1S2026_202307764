@@ -45,6 +45,8 @@ private:
     int column;
 
 public:
+    // Constructor por defecto (necesario para declarar variables Token vacías)
+    Token() : type(TokenType::FIN_ARCHIVO), lexeme(""), line(0), column(0) {}
     // Constructor
     Token(TokenType t, std::string lex, int l, int c)
         : type(t), lexeme(lex), line(l), column(c) {}
