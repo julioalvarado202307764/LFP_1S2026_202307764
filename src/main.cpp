@@ -2,48 +2,60 @@
 #include <fstream>
 #include <sstream>
 #include "LexicalAnalyzer.h"
+#include "SyntaxAnalyzer.h"
+#include "ErrorManager.h"
 
 int main() {
     // 1. Leer el archivo de prueba
-    // Ajusta esta ruta dependiendo de desde dónde ejecutes el binario
     std::string filename = "tests/prueba1.task"; 
     std::ifstream file(filename);
 
     if (!file.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo " << filename << "\n";
-        std::cerr << "Verifica que la ruta sea correcta.\n";
         return 1;
     }
 
-    // Leemos todo el contenido del archivo a un string
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string sourceCode = buffer.str();
     file.close();
 
-    // 2. Instanciar el analizador léxico
+    // 2. Instanciar los componentes en orden
+    ErrorManager errorManager;
     LexicalAnalyzer lexer(sourceCode);
-    Token token = lexer.nextToken();
+    
+    // Le pasamos el lexer y el errorManager al parser
+    SyntaxAnalyzer parser(lexer, errorManager);
 
-    // 3. Imprimir el encabezado de la tabla para la consola
+    std::cout << "Iniciando analisis sintactico...\n";
     std::cout << "========================================================\n";
-    std::cout << "                  TABLA DE TOKENS                       \n";
-    std::cout << "========================================================\n";
-    std::cout << "Lexema\t\t\tTipo\t\t\tLinea\tCol\n";
-    std::cout << "--------------------------------------------------------\n";
 
-    // 4. Ciclo principal: pedimos tokens hasta llegar al final del archivo
-    while (token.getType() != TokenType::FIN_ARCHIVO) {
-        std::cout << token.getLexeme() << "\t\t\t"
-                  << token.getTypeName() << "\t\t"
-                  << token.getLine() << "\t"
-                  << token.getColumn() << "\n";
+    // 3. ¡Ejecutar el Parser!
+    parser.parse();
 
-        token = lexer.nextToken();
+    // 4. Revisar los resultados
+    if (!errorManager.hasErrors()) {
+        std::cout << " FELICIDADES! El archivo es sintacticamente CORRECTO. \n";
+        std::cout << " La Fase 2 esta completa. Listo para generar Graphviz.\n";
+    } else {
+        std::cout << " SE ENCONTRARON ERRORES DURANTE EL ANALISIS \n";
+        std::cout << "--------------------------------------------------------\n";
+        std::cout << "No.\tTipo\t\tLinea\tCol\tLexema/Descripcion\n";
+        std::cout << "--------------------------------------------------------\n";
+        
+        const auto& errores = errorManager.getErrors();
+        for (const auto& err : errores) {
+            std::string tipo = (err.type == ErrorType::LEXICO) ? "Lexico" : "Sintactico";
+            
+            std::cout << err.id << "\t" 
+                      << tipo << "\t"
+                      << err.line << "\t" 
+                      << err.column << "\t"
+                      << "'" << err.lexeme << "' - " << err.description << "\n";
+        }
     }
 
     std::cout << "========================================================\n";
-    std::cout << "Analisis lexico finalizado.\n";
 
     return 0;
 }
