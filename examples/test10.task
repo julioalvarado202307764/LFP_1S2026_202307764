@@ -1,6 +1,5 @@
 TABLERO "Semestre I" {
     COLUMNA "Tareas LFP" {
         tarea: "Proyecto Final" [prioridad: ALTA, responsable: "Estudiante", fecha_limite: 2026-05-30],
-        tarea: "Práctica 3" [prioridad: MEDIA, responsable: "Estudiante", fecha_limite: 2026-05-15],
-    };
+     };
 };
