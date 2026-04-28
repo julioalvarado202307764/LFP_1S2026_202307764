@@ -26,3 +26,20 @@ Para compilar y ejecutar este proyecto desde cero, necesitas tener instalado:
 ## 💻 Instrucciones de Compilación (VS Code / Terminal Windows)
 
 El proyecto está configurado para compilarse fácilmente utilizando CMake y MinGW Makefiles directamente desde la terminal. Sigue estos pasos:
+**1. Preparar el entorno de construcción**
+Abre la terminal en la raíz del proyecto y crea una carpeta dedicada para los archivos binarios (esto mantiene el código fuente limpio):
+```bash
+mkdir build
+cd build
+
+
+
+
+
+
+
+
+
+
+
+
