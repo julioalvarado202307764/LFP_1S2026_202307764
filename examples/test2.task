@@ -1,0 +1,6 @@
+TABLERO "Control de Calidad" {
+    COLUMNA "Pruebas Pendientes" {
+        tarea: "Test de Regresión" [prioridad: ALTA, responsable: "Sofía", fecha_limite: 2026-05-20],
+        tarea: "Pruebas de Carga" [prioridad: MEDIA, responsable: "Marco", fecha_limite: 2026-05-22],
+    };
+};

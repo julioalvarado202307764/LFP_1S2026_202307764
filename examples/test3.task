@@ -1,0 +1,7 @@
+TABLERO "Marketing Q3" {
+    COLUMNA "Redes Sociales" {
+        tarea: "Diseñar Reels" [prioridad: MEDIA, responsable: "Lucía", fecha_limite: 2026-07-01],
+        tarea: "Pautar en Google Ads" [prioridad: ALTA, responsable: "Daniel", fecha_limite: 2026-07-03],
+        tarea: "Redactar Newsletter" [prioridad: BAJA, responsable: "Carmen", fecha_limite: 2026-07-10],
+    };
+};

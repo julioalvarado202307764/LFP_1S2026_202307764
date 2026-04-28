@@ -1,0 +1,6 @@
+TABLERO "App Fitness" {
+    COLUMNA "UI/UX" {
+        tarea: "Wireframes Inicio" [prioridad: ALTA, responsable: "Sonia", fecha_limite: 2026-04-30],
+        tarea: "Prototipo Navegación" [prioridad: MEDIA, responsable: "Sonia", fecha_limite: 2026-05-04],
+    };
+};

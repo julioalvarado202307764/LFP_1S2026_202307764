@@ -1,0 +1,7 @@
+TABLERO "Convención Anual" {
+    COLUMNA "Logística" {
+        tarea: "Reservar Hotel" [prioridad: ALTA, responsable: "Gabriela", fecha_limite: 2026-08-01],
+        tarea: "Contratar Catering" [prioridad: MEDIA, responsable: "Gabriela", fecha_limite: 2026-08-05],
+        tarea: "Enviar Invitaciones" [prioridad: ALTA, responsable: "Raúl", fecha_limite: 2026-08-10],
+    };
+};

@@ -1,0 +1,6 @@
+TABLERO "Infraestructura IT" {
+    COLUMNA "Mantenimiento Servidores" {
+        tarea: "Actualizar SO" [prioridad: ALTA, responsable: "Andrés", fecha_limite: 2026-05-12],
+        tarea: "Limpieza de Logs" [prioridad: BAJA, responsable: "Andrés", fecha_limite: 2026-05-15],
+    };
+};

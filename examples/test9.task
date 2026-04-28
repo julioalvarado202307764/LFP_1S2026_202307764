@@ -1,0 +1,6 @@
+TABLERO "Documentación" {
+    COLUMNA "Manuales" {
+        tarea: "Manual de Instalación" [prioridad: MEDIA, responsable: "Paola", fecha_limite: 2026-06-20],
+        tarea: "Guía de Usuario" [prioridad: BAJA, responsable: "Paola", fecha_limite: 2026-06-25],
+    };
+};

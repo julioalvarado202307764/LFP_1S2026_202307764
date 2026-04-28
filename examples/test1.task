@@ -1,0 +1,7 @@
+TABLERO "Sistema E-commerce" {
+    COLUMNA "Backend" {
+        tarea: "Configurar Base de Datos" [prioridad: ALTA, responsable: "Luis", fecha_limite: 2026-06-01],
+        tarea: "Crear API de Usuarios" [prioridad: ALTA, responsable: "Elena", fecha_limite: 2026-06-05],
+        tarea: "Integrar Pasarela Pagos" [prioridad: MEDIA, responsable: "Roberto", fecha_limite: 2026-06-15],
+    };
+};

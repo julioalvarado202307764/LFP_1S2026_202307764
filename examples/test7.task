@@ -1,0 +1,6 @@
+TABLERO "Auditoría 2026" {
+    COLUMNA "Hallazgos Críticos" {
+        tarea: "Parchear Inyección SQL" [prioridad: ALTA, responsable: "Víctor", fecha_limite: 2026-05-02],
+        tarea: "Cifrar Contraseñas" [prioridad: ALTA, responsable: "Víctor", fecha_limite: 2026-05-03],
+    };
+};
