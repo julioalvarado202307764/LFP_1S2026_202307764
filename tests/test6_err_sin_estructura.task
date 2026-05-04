@@ -1,0 +1,3 @@
+TABLERO "Estructura Rota" {
+    tarea: "Infiltrada" [prioridad: MEDIA, responsable: "Agente", fecha_limite: 2026-05-30]
+};

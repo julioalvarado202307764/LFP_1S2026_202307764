@@ -1,0 +1,6 @@
+TABLERO "Caos Total" {
+    & COLUMNA "Errores" {
+        tarea "Sin dos puntos" [prioridad: ALTA, responsable: "Yo", fecha_limite: 2026-06-02],
+        tarea: "Falta comilla [prioridad: BAJA, responsable: "Tu", fecha_limite: 2026-06-03]
+    };
+};

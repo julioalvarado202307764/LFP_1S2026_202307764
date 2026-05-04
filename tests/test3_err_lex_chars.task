@@ -1,0 +1,5 @@
+TABLERO "App Movil" {
+    $ COLUMNA "To Do" {
+        tarea: "Login" [prioridad: ALTA, responsable: "Juan", fecha_limite: 2026-05-20] @
+    }; ?
+};

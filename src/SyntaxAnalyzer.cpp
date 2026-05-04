@@ -28,8 +28,12 @@ void SyntaxAnalyzer::avanzarToken()
 
 void SyntaxAnalyzer::syncToCommaOrBracket()
 {
+    // Detenemos el devorador si encontramos la coma, el corchete...
+    // ¡O si nos topamos con los muros de contención de la columna!
     while (currentToken.getType() != TokenType::COMA &&
            currentToken.getType() != TokenType::COR_C &&
+           currentToken.getType() != TokenType::LLAVE_C &&      
+           currentToken.getType() != TokenType::PUNTO_Y_COMA &&  
            currentToken.getType() != TokenType::FIN_ARCHIVO)
     {
         avanzarToken();
@@ -318,6 +322,7 @@ void SyntaxAnalyzer::atributos(int parentId, TareaData &tareaActual)
 }
 
 // <atributos_prima> ::= "," <atributo> <atributos_prima> | ε
+// <atributos_prima> ::= "," <atributo> <atributos_prima> | ε
 void SyntaxAnalyzer::atributos_prima(int parentId, TareaData &tareaActual)
 {
     // El FIRST de esta regla es la coma (,)
@@ -325,6 +330,16 @@ void SyntaxAnalyzer::atributos_prima(int parentId, TareaData &tareaActual)
     {
         // 1. Graficamos y consumimos la coma
         match(TokenType::COMA, parentId);
+
+        // 👇 EL PARCHE: Tolerancia al Trailing Comma (Coma final) 👇
+        // Si después de la coma viene el corchete ']', lo perdonamos
+        if (currentToken.getType() == TokenType::COR_C)
+        {
+            int epsilonId = reportGen.addNode("ε", true);
+            reportGen.addChild(parentId, epsilonId);
+            return; // 🛑 Cortamos la ejecución aquí para que no busque más atributos
+        }
+        // 👆 ====================================================== 👆
 
         // 2. Graficamos y llamamos al siguiente atributo
         int atributoNodeId = reportGen.addNode("<atributo>");

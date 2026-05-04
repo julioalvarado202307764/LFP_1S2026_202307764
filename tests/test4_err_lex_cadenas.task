@@ -1,0 +1,5 @@
+TABLERO "Error Strings" {
+    COLUMNA "Fallas" {
+        tarea: "Texto roto [prioridad: ALTA, responsable: "Cris", fecha_limite: 2026-05-22]
+    };
+};

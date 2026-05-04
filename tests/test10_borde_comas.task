@@ -1,0 +1,5 @@
+TABLERO "Tolerante" {
+    COLUMNA "Prueba" {
+        tarea: "Ignorar coma" [prioridad: ALTA, responsable: "Sistema", fecha_limite: 2026-06-10, ],
+    };
+};

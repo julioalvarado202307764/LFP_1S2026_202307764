@@ -1,0 +1,5 @@
+TABLERO "Faltan Llaves" {
+    COLUMNA "Unica" {
+        tarea: "Fix bug" [prioridad: ALTA, responsable: "Dev", fecha_limite: 2026-05-25
+    };
+;

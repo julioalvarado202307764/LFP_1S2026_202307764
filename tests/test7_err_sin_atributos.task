@@ -1,0 +1,5 @@
+TABLERO "Atributos Malos" {
+    COLUMNA "Lista 1" {
+        tarea: "Documentar" [prioridad: BAJA, responsabilidad: "Pedro", fecha_limite: 2026-06-01]
+    };
+};
