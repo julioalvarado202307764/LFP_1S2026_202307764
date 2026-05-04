@@ -26,6 +26,18 @@ private:
 public:
     // Método para registrar un nuevo error (se usará en el Lexer y en el Parser)
     void addError(ErrorType type, const std::string& lexeme, const std::string& description, int line, int col) {
+        
+        // Filtro anti-duplicados en cascada
+        if (!errors.empty()) {
+            const ErrorItem& lastError = errors.back();
+            // Si el error es idéntico al anterior (mismo lexema, línea y columna), lo ignoramos
+            if (lastError.lexeme == lexeme && lastError.line == line && lastError.column == col) {
+                return; 
+            }
+        }
+
+        // Si sobrevive al filtro, lo guardamos normalmente
+        // (AQUÍ ES DONDE ESTABA EL ERROR, AHORA ESTÁ ADENTRO DE LA FUNCIÓN)
         errors.push_back({nextId++, lexeme, type, description, line, col});
     }
 

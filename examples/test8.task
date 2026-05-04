@@ -1,6 +1,6 @@
-TABLERO "Documentación" {
-    COLUMNA "Manuales" {
-        tarea: "Manual de Instalación" [prioridad: MEDIA, responsable: "Paola", fecha_limite: 2026-06-20],
-        tarea: "Guía de Usuario" [prioridad: BAJA, responsable: "Paola", fecha_limite: 2026-06-25],
+TABLERO "Caos Total" {
+    & COLUMNA "Errores" {
+        tarea "Sin dos puntos" [prioridad: ALTA, responsable: "Yo", fecha_limite: 2026-06-02],
+        tarea: "Falta comilla [prioridad: BAJA, responsable: "Tu", fecha_limite: 2026-06-03]
     };
 };
